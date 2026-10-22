@@ -10,10 +10,12 @@ import {
   X,
   ExternalLink,
   Sparkles,
-  AlertTriangle
+  AlertTriangle,
+  Server
 } from 'lucide-react';
 import { useApp } from '../context/AppContext.js';
 import { usePushNotifications } from '../hooks/usePushNotifications.js';
+import { safeJson } from '../utils/apiIntercept.js';
 
 export const OnboardingModal: React.FC = () => {
   const {
@@ -58,7 +60,7 @@ export const OnboardingModal: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: appEmail.trim(), appPassword: appPassword.trim() }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (res.ok && data.success) {
         showToast(data.message, 'success');
         refreshAll();

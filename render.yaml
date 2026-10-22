@@ -30,7 +30,3 @@ services:
         sync: false
       - key: SYNC_POLL_INTERVAL_SECONDS
         value: 60
-    disk:
-      name: sentinel-data
-      mountPath: /app/data
-      sizeGB: 1

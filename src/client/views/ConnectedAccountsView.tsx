@@ -10,10 +10,12 @@ import {
   RefreshCw,
   LogOut,
   Info,
-  Key
+  Key,
+  Server
 } from 'lucide-react';
 import { useApp } from '../context/AppContext.js';
 import { ConfirmDialog } from '../components/ConfirmDialog.js';
+import { safeJson } from '../utils/apiIntercept.js';
 
 export const ConnectedAccountsView: React.FC = () => {
   const {
@@ -28,6 +30,23 @@ export const ConnectedAccountsView: React.FC = () => {
   const [copiedUri, setCopiedUri] = useState(false);
   const [isDisconnectDialogOpen, setIsDisconnectDialogOpen] = useState(false);
   const [deleteDataOnDisconnect, setDeleteDataOnDisconnect] = useState(false);
+
+  const [serverUrl, setServerUrl] = useState(() => localStorage.getItem('mailsentinel_server_url') || '');
+  const [showServerSetup, setShowServerSetup] = useState(() => !localStorage.getItem('mailsentinel_server_url'));
+
+  const saveServerUrl = () => {
+    if (!serverUrl.trim()) {
+      localStorage.removeItem('mailsentinel_server_url');
+      showToast('Cleared custom server URL', 'info');
+      setShowServerSetup(false);
+      return;
+    }
+    const clean = serverUrl.trim().replace(/\/+$/, '');
+    localStorage.setItem('mailsentinel_server_url', clean);
+    showToast(`Server URL set to ${clean}`, 'success');
+    setShowServerSetup(false);
+    refreshAll();
+  };
 
   // App Password Form state
   const [appEmail, setAppEmail] = useState('');
@@ -60,7 +79,7 @@ export const ConnectedAccountsView: React.FC = () => {
         }),
       });
 
-      const data = await res.json();
+      const data = await safeJson(res);
       if (res.ok && data.success) {
         showToast(data.message, 'success');
         refreshAll();
@@ -241,6 +260,35 @@ export const ConnectedAccountsView: React.FC = () => {
           {authMethod === 'app_password' ? (
             /* App Password Form */
             <form onSubmit={handleConnectAppPassword} className="space-y-4 max-w-lg mx-auto text-left py-2">
+              {showServerSetup && (
+                <div className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-700/60 text-xs text-amber-200 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-amber-300">
+                    <Server className="w-4 h-4 text-amber-400" />
+                    <span>Step 1: Set Backend Server URL</span>
+                  </div>
+                  <p className="text-[11px] text-amber-300/80">
+                    If testing on Wi-Fi with your laptop: use <code className="bg-slate-900 px-1 py-0.5 rounded text-amber-200">http://192.168.0.102:3001</code>.
+                    For 24/7 laptop-off monitoring: enter your free Render URL.
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={serverUrl}
+                      onChange={(e) => setServerUrl(e.target.value)}
+                      placeholder="e.g. http://192.168.0.102:3001"
+                      className="flex-1 px-3 py-1.5 bg-slate-950 border border-amber-700/80 rounded-lg text-xs text-slate-100 font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={saveServerUrl}
+                      className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold whitespace-nowrap"
+                    >
+                      Save URL
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="p-3.5 rounded-xl bg-sentinel-950/40 border border-sentinel-800/60 text-xs text-sentinel-300 flex items-start gap-2.5">
                 <Key className="w-4 h-4 text-sentinel-400 shrink-0 mt-0.5" />
                 <span>
