@@ -2,6 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.js';
 import './index.css';
+import { setupApiIntercept } from './utils/apiIntercept.js';
+
+// Setup API URL intercept for mobile APK and remote server
+setupApiIntercept();
 
 // Register Service Worker for PWA & Web Push
 if ('serviceWorker' in navigator && process.env.NODE_ENV !== 'test') {
