@@ -22,7 +22,9 @@ export function setupApiIntercept() {
       url.startsWith('https://localhost/api/') ||
       url.startsWith('capacitor://localhost/api/')
     ) {
-      const serverUrl = localStorage.getItem('mailsentinel_server_url');
+      const defaultServer = 'https://mailsentinel-0azx.onrender.com';
+      const isNative = (window as any).Capacitor?.isNativePlatform() || window.location.origin.includes('localhost');
+      const serverUrl = localStorage.getItem('mailsentinel_server_url') || (isNative ? defaultServer : '');
       if (serverUrl && serverUrl.trim()) {
         const cleanPath = url.replace(/^(?:https?|capacitor):\/\/localhost/, '');
         const base = serverUrl.trim().replace(/\/+$/, '');

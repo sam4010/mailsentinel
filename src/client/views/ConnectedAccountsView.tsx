@@ -31,7 +31,7 @@ export const ConnectedAccountsView: React.FC = () => {
   const [isDisconnectDialogOpen, setIsDisconnectDialogOpen] = useState(false);
   const [deleteDataOnDisconnect, setDeleteDataOnDisconnect] = useState(false);
 
-  const [serverUrl, setServerUrl] = useState(() => localStorage.getItem('mailsentinel_server_url') || '');
+  const [serverUrl, setServerUrl] = useState(() => localStorage.getItem('mailsentinel_server_url') || 'https://mailsentinel-0azx.onrender.com');
   const [showServerSetup, setShowServerSetup] = useState(() => !localStorage.getItem('mailsentinel_server_url'));
 
   const saveServerUrl = () => {

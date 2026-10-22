@@ -35,7 +35,7 @@ export const SettingsView: React.FC = () => {
   const [syncInterval, setSyncInterval] = useState(60);
   const [retentionDays, setRetentionDays] = useState(90);
 
-  const [serverUrl, setServerUrl] = useState(() => localStorage.getItem('mailsentinel_server_url') || '');
+  const [serverUrl, setServerUrl] = useState(() => localStorage.getItem('mailsentinel_server_url') || 'https://mailsentinel-0azx.onrender.com');
   const [serverStatus, setServerStatus] = useState<'idle' | 'checking' | 'connected' | 'error'>('idle');
   const [serverErrorMessage, setServerErrorMessage] = useState('');
 

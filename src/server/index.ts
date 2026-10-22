@@ -14,6 +14,21 @@ const server = app.listen(config.port, () => {
 
   // Start background email polling worker
   SyncWorker.start();
+
+  // 24/7 Keep-alive monitor on cloud platforms (prevents Render free tier spin-down)
+  const pingUrl = process.env.RENDER_EXTERNAL_URL || (config.nodeEnv === 'production' ? 'https://mailsentinel-0azx.onrender.com' : null);
+  if (pingUrl) {
+    const target = pingUrl.replace(/\/+$/, '');
+    console.log(`[KeepAlive] 24/7 keep-alive monitor active for ${target}`);
+    setInterval(async () => {
+      try {
+        const res = await fetch(`${target}/health`);
+        console.log(`[KeepAlive] Pinged ${target}/health - Status: ${res.status}`);
+      } catch (err: any) {
+        console.warn('[KeepAlive] Ping failed:', err?.message || err);
+      }
+    }, 10 * 60 * 1000); // Every 10 minutes (Render sleep threshold is 15 minutes)
+  }
 });
 
 // Graceful shutdown

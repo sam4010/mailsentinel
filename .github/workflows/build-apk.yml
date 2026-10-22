@@ -56,9 +56,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v1.0.1
-          name: "MailSentinel v1.0.1"
-          body: "Direct download of MailSentinel Android APK v1.0.1 with enhanced mobile server routing."
+          tag_name: v1.0.2
+          name: "MailSentinel v1.0.2"
+          body: "Direct download of MailSentinel Android APK v1.0.2 pre-configured with 24/7 Render cloud monitoring."
           draft: false
           prerelease: false
           files: android/app/build/outputs/apk/debug/app-debug.apk

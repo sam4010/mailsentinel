@@ -1,0 +1,22 @@
+name: 24/7 Render Keep-Alive
+
+on:
+  schedule:
+    # Runs every 10 minutes (cron format: minute hour day month day-of-week)
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping MailSentinel 24/7 Health Endpoint
+        run: |
+          echo "Pinging MailSentinel on Render to prevent sleep..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://mailsentinel-0azx.onrender.com/health")
+          echo "Render response code: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "✅ MailSentinel is online and running 24/7."
+          else
+            echo "⚠️ Unexpected status: $HTTP_STATUS. Waking server up..."
+          fi
