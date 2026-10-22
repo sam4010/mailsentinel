@@ -38,6 +38,7 @@ export const config = {
   sync: {
     pollIntervalSeconds: parseInt(process.env.SYNC_POLL_INTERVAL_SECONDS || '60', 10),
     maxEmailsPerSync: parseInt(process.env.MAX_EMAILS_PER_SYNC || '50', 10),
+    pubsubTopic: process.env.GMAIL_PUBSUB_TOPIC || '',
   },
 
   // Storage

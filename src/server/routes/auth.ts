@@ -64,6 +64,13 @@ router.get('/google/callback', async (req, res) => {
     db.saveConnectedAccount(userId, userEmail, tokens, pictureUrl);
     console.log(`[OAuth] Successfully connected Gmail account: ${userEmail}`);
 
+    // Register Gmail Watch if topic is configured
+    if (config.sync.pubsubTopic) {
+      import('../gmail/client.js').then(({ GmailService }) => {
+        GmailService.watchInbox(userId, config.sync.pubsubTopic).catch(e => console.warn('[OAuth] Watch registration:', e));
+      });
+    }
+
     // Trigger initial background sync asynchronously
     SyncWorker.syncUser(userId).catch(e => console.error('[OAuth] Initial sync error:', e));
 

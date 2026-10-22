@@ -122,6 +122,28 @@ export class GmailService {
   }
 
   /**
+   * Register a Gmail watch subscription with Google Cloud Pub/Sub
+   */
+  public static async watchInbox(userId: string, topicName: string) {
+    if (!topicName) return null;
+    try {
+      const gmail = await this.getClient(userId);
+      const res = await gmail.users.watch({
+        userId: 'me',
+        requestBody: {
+          topicName,
+          labelIds: ['INBOX'],
+        },
+      });
+      console.log(`[Gmail Watch] Active on topic: ${topicName}. Expires: ${res.data.expiration}`);
+      return res.data;
+    } catch (err: any) {
+      console.warn(`[Gmail Watch] Failed to activate watch on topic ${topicName}:`, err?.message || err);
+      return null;
+    }
+  }
+
+  /**
    * Fetch recent messages from Gmail inbox (skips spam and trash)
    */
   public static async fetchRecentMessages(

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MailSentinel</string>
+    <string name="title_activity_main">MailSentinel</string>
+    <string name="package_name">com.mailsentinel.app</string>
+    <string name="custom_url_scheme">com.mailsentinel.app</string>
+</resources>
