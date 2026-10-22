@@ -2,9 +2,47 @@ import { Router } from 'express';
 import { config } from '../config.js';
 import { db } from '../db/index.js';
 import { generateAuthUrl, exchangeCodeForTokens } from '../gmail/oauth.js';
+import { ImapService } from '../imap/client.js';
 import { SyncWorker } from '../sync/worker.js';
 
 const router = Router();
+
+/**
+ * Connect Gmail directly with 16-letter App Password (No Google Cloud Console needed!)
+ */
+router.post('/imap/connect', async (req, res) => {
+  const { email, appPassword } = req.body;
+
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: 'Please enter a valid Gmail address.' });
+  }
+
+  if (!appPassword || appPassword.replace(/\s+/g, '').length < 8) {
+    return res.status(400).json({ error: 'Please enter your 16-letter Google App Password.' });
+  }
+
+  try {
+    console.log(`[IMAP] Verifying Gmail App Password for ${email}...`);
+    await ImapService.verifyConnection(email, appPassword);
+
+    const account = db.saveImapAccount('default_user', email, appPassword);
+    console.log(`[IMAP] Successfully connected Gmail account via App Password: ${email}`);
+
+    // Trigger initial sync in background
+    SyncWorker.syncUser('default_user').catch(e => console.error('[IMAP] Initial sync error:', e));
+
+    res.json({
+      success: true,
+      message: `Successfully connected ${email} via Gmail App Password!`,
+      account,
+    });
+  } catch (err: any) {
+    console.error('[IMAP] Connection failed:', err?.message || err);
+    res.status(400).json({
+      error: err?.message || 'Failed to authenticate with Gmail. Please double-check your App Password.',
+    });
+  }
+});
 
 /**
  * Get current authentication and service configuration status

@@ -70,7 +70,7 @@ export interface NotificationEvent {
 export interface ConnectedAccount {
   id: string;
   userId: string;
-  provider: 'google';
+  provider: 'google' | 'imap';
   email: string;
   pictureUrl?: string | null;
   historyId?: string | null;

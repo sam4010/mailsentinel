@@ -1,6 +1,7 @@
 import { db } from '../db/index.js';
 import { config } from '../config.js';
 import { GmailService } from '../gmail/client.js';
+import { ImapService } from '../imap/client.js';
 import { evaluateAllRules } from '../rules/matcher.js';
 import { classifyEmail } from '../rules/classifier.js';
 import { NotificationService } from '../notifications/service.js';
@@ -85,7 +86,14 @@ export class SyncWorker {
       let emails: EmailPayload[] = [];
       let newHistoryId: string | undefined = account.historyId || undefined;
 
-      if (account.historyId) {
+      if (account.provider === 'imap') {
+        // IMAP synchronization with Gmail App Password
+        const appPassword = db.getImapPassword(userId);
+        if (!appPassword) {
+          throw new Error('IMAP credentials not found');
+        }
+        emails = await ImapService.fetchRecentEmails(account.email, appPassword, config.sync.maxEmailsPerSync);
+      } else if (account.historyId) {
         // Incremental sync using Gmail history cursor
         const histResult = await GmailService.fetchHistoryMessages(userId, account.historyId);
         if (histResult.historyExpired) {

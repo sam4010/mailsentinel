@@ -240,6 +240,46 @@ export class Database {
     }
   }
 
+  public saveImapAccount(userId: string, email: string, appPassword: string): ConnectedAccount {
+    const existing = this.data.accounts[userId];
+    const now = new Date().toISOString();
+    const cleanPassword = appPassword.replace(/\s+/g, '');
+
+    const stored: StoredAccount = {
+      id: existing?.id || `acc_${crypto.randomBytes(8).toString('hex')}`,
+      userId,
+      provider: 'imap',
+      email: email.trim(),
+      pictureUrl: null,
+      historyId: null,
+      lastSyncAt: null,
+      syncStatus: 'idle',
+      errorMessage: null,
+      totalSyncedCount: existing?.totalSyncedCount || 0,
+      tokenExpiry: Date.now() + 365 * 24 * 3600 * 1000,
+      accessTokenEnc: encrypt(cleanPassword),
+      refreshTokenEnc: '',
+      createdAt: existing?.createdAt || now,
+      updatedAt: now,
+    };
+
+    this.data.accounts[userId] = stored;
+    this.persist();
+
+    const { accessTokenEnc, refreshTokenEnc, ...publicAccount } = stored;
+    return publicAccount;
+  }
+
+  public getImapPassword(userId: string = DEFAULT_USER_ID): string | null {
+    const stored = this.data.accounts[userId];
+    if (!stored || stored.provider !== 'imap') return null;
+    try {
+      return decrypt(stored.accessTokenEnc);
+    } catch {
+      return null;
+    }
+  }
+
   public saveConnectedAccount(
     userId: string,
     email: string,
